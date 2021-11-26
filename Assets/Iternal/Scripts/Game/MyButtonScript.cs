@@ -10,7 +10,7 @@ public class MyButtonScript : MonoBehaviour
         if (isRacePressed) ButtonPressed();
     }
     private void ButtonPressed(){
-        UI_Controller.Instance.R_ButtonPressed(val);
+        GameController.Instance.RedColorChanged(val);
     }
     private IEnumerator Wait(){
         yield return new WaitForSeconds(0.5f);

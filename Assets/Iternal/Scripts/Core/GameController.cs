@@ -1,46 +1,30 @@
 using UnityEngine;
+using System;
 
 public class GameController : MonoBehaviour
 {
-    // private static class Clr : Color32{
-    //     public static Color32 ChangeColor(GameObject target, byte r){
-    //         var color = UI_Controller.GetColor(target);
-    //         color.r += r;
-    //         return color;
-    //     }
-    //     public static Color32 ChangeColor(GameObject target, byte g){
-    //         var color = UI_Controller.GetColor(target);
-    //         color.g += g;
-    //         return color;
-    //     }
-    //     public static Color32 ChangeColor(GameObject target, byte b){
-    //         var color = UI_Controller.GetColor(target);
-    //         color.b = b;
-    //         return color;
-    //     }
-    // }
+    [SerializeField] public GameObject _target { get; private set; }
 
-    private GameObject _target;
+    public static GameController Instance;
+    public event Action<Color32> ObjColorChangedEvent;
 
-    private void Start(){
-        UI_Controller.Instance.RedColorChangedEvent += RedColorChanged;
-        UI_Controller.Instance.GreenColorChangedEvent += GreenColorChanged;
-        UI_Controller.Instance.BlueColorChangedEvent += BlueColorChanged;
-    }
-    private void OnDestroy(){
-        UI_Controller.Instance.RedColorChangedEvent -= RedColorChanged;
-        UI_Controller.Instance.GreenColorChangedEvent -= GreenColorChanged;
-        UI_Controller.Instance.BlueColorChangedEvent -= BlueColorChanged;
+    private void Awake(){
+        Instance = this;
     }
 
     public void ObjPicked(GameObject obj){
         _target = obj;
-        var color = UI_Controller.GetColor(obj);
-        UI_Controller.Instance.SetColor(obj, color);
+
+        var color = obj.GetComponent<ColorController>()._cubeColor.GetColor();
+        ObjColorChangedEvent?.Invoke(color);
     }
 
-    private void RedColorChanged(int val){
-        var color = UI_Controller.GetColor(_target);
+    private Color32 GetColor(){
+        return _target.GetComponent<ColorController>()._cubeColor.GetColor();
+    }
+
+    public void RedColorChanged(int val){
+        var color = GetColor();
 
         var intR = color.r + val;
         byte r = 0;
@@ -51,18 +35,18 @@ public class GameController : MonoBehaviour
 
         color.r = r;
 
-        UI_Controller.Instance.SetColor(_target, color);
+        ObjColorChangedEvent?.Invoke(color);
     }
-    private void GreenColorChanged(float val){
-        var color = UI_Controller.GetColor(_target);
+    public void GreenColorChanged(float val){
+        var color = GetColor();
         color.g = System.Convert.ToByte(val * 255);
 
-        UI_Controller.Instance.SetColor(_target, color);
+        ObjColorChangedEvent?.Invoke(color);
     }
-    private void BlueColorChanged(){
-        var color = UI_Controller.GetColor(_target);
-        color.b = System.Convert.ToByte(Random.Range(byte.MinValue, byte.MaxValue + 1));
+    public void BlueColorChanged(){
+        var color = GetColor();
+        color.b = System.Convert.ToByte(UnityEngine.Random.Range(byte.MinValue, byte.MaxValue + 1));
 
-        UI_Controller.Instance.SetColor(_target, color);
+        ObjColorChangedEvent?.Invoke(color);
     }
 }
